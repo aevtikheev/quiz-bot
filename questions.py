@@ -8,22 +8,25 @@ from env_settings import env_settings
 CHEAT_PHRASE = 'cheat'
 
 
-def get_random_question():
+def get_random_question() -> str:
     """Extract a random question from question data file."""
     with open(env_settings.questions_file) as questions_file:
         questions = json.load(questions_file)
         return random.choice(list(questions.keys()))
 
 
-def get_answer(question):
+def get_answer(question) -> str:
     """Get answer for a question from question data file."""
     with open(env_settings.questions_file) as questions_file:
         questions = json.load(questions_file)
         return questions[question]
 
 
-def is_correct_answer(user_answer, true_answer, cheating=False):
-    """Clean the answer from the question data file and compare with the given one."""
+def is_correct_answer(user_answer: str, true_answer: str, cheating=False) -> bool:
+    """
+    Clean the answer from the question data file and compare with the given one.
+    If cheating set to True, CHEAT_PHRASE considered as a correct answer.
+    """
     if cheating and user_answer == CHEAT_PHRASE:
         return True
 

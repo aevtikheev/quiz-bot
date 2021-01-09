@@ -1,10 +1,10 @@
 """Telegram version of Quiz Bot."""
 from enum import Enum
 
+from redis import Redis
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
                           CallbackContext, ConversationHandler)
-from redis import Redis
 
 from env_settings import env_settings
 from questions import get_random_question, get_answer, is_correct_answer
@@ -15,11 +15,11 @@ BOT_DATA_REDIS_DB_KEY = 'redis_db'
 
 
 class BotState(Enum):
-    MENU = 'Choice'
-    QUESTION = 'Question'
+    MENU = 1
+    QUESTION = 2
 
 
-def handle_start(update: Update, context: CallbackContext):
+def handle_start(update: Update, context: CallbackContext) -> BotState:
     """Handle /start command, Show menu buttons and greeting."""
     menu_buttons = [[NEW_QUESTION_TEXT, GIVE_UP_TEXT], [SCORE_TEXT]]
     reply_markup = ReplyKeyboardMarkup(menu_buttons)
@@ -31,10 +31,7 @@ def handle_start(update: Update, context: CallbackContext):
     return BotState.MENU
 
 
-def handle_new_question_request(
-        update: Update,
-        context: CallbackContext
-):
+def handle_new_question_request(update: Update, context: CallbackContext) -> BotState:
     """Send new question to the player."""
     redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
     question = get_random_question()
@@ -44,10 +41,7 @@ def handle_new_question_request(
     return BotState.QUESTION
 
 
-def handle_solution_attempt(
-        update: Update,
-        context: CallbackContext
-):
+def handle_solution_attempt(update: Update, context: CallbackContext) -> BotState:
     """Check the answer. If it's correct, send congrats, else show the right answer."""
     redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
     question = redis_db.get(update.effective_user.id).decode('utf-8')
@@ -61,10 +55,7 @@ def handle_solution_attempt(
     return BotState.MENU
 
 
-def handle_give_up_request(
-        update: Update,
-        context: CallbackContext
-):
+def handle_give_up_request(update: Update, context: CallbackContext) -> BotState:
     """Show the correct answer and ask a new one."""
     redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
     question = redis_db.get(update.effective_user.id).decode('utf-8')
@@ -78,10 +69,7 @@ def handle_give_up_request(
     return BotState.QUESTION
 
 
-def handle_score_request(
-        update: Update,
-        context: CallbackContext
-):
+def handle_score_request(update: Update, context: CallbackContext) -> int:
     """Show the overall score for the player."""
     update.message.reply_text('Десять Вассерманов из десяти. Вы великолепны!')
 
