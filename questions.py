@@ -5,6 +5,10 @@ import random
 from env_settings import env_settings
 
 
+NEW_QUESTION_TEXT = 'Новый вопрос'
+GIVE_UP_TEXT = 'Сдаться'
+SCORE_TEXT = 'Мой счёт'
+
 CHEAT_PHRASE = 'cheat'
 
 

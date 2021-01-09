@@ -7,17 +7,11 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 from redis import Redis
 
 from env_settings import env_settings
-from questions import get_random_question, get_answer, is_correct_answer
+from questions import (get_random_question, get_answer, is_correct_answer,
+                       NEW_QUESTION_TEXT, GIVE_UP_TEXT, SCORE_TEXT)
 
-
-NEW_QUESTION_TEXT = 'Новый вопрос'
-GIVE_UP_TEXT = 'Сдаться'
-SCORE_TEXT = 'Мой счёт'
 
 BOT_DATA_REDIS_DB = 'redis_db'
-
-menu_buttons = [[NEW_QUESTION_TEXT, GIVE_UP_TEXT], [SCORE_TEXT]]
-reply_markup = ReplyKeyboardMarkup(menu_buttons)
 
 
 class BotState(Enum):
@@ -27,6 +21,8 @@ class BotState(Enum):
 
 def handle_start(update: Update, context: CallbackContext):
     """TODO"""
+    menu_buttons = [[NEW_QUESTION_TEXT, GIVE_UP_TEXT], [SCORE_TEXT]]
+    reply_markup = ReplyKeyboardMarkup(menu_buttons)
     update.message.reply_text(
         f'Добрый день! Нажмите "{NEW_QUESTION_TEXT}" для начала игры.',
         reply_markup=reply_markup
@@ -87,7 +83,7 @@ def handle_score_request(
         context: CallbackContext
 ):
     """TODO"""
-    update.message.reply_text(f'Десять Вассерманов из десяти. Вы великолепны!')
+    update.message.reply_text('Десять Вассерманов из десяти. Вы великолепны!')
 
     return ConversationHandler.END
 
