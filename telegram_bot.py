@@ -46,7 +46,7 @@ def handle_solution_attempt(update: Update, context: CallbackContext) -> BotStat
     redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
     question = redis_db.get(update.effective_user.id).decode('utf-8')
     answer = get_answer(question)
-    if is_correct_answer(update.message.text, answer, cheating=True):
+    if is_correct_answer(update.message.text, answer):
         reply_text = 'Поздравляем! Ответ верен. Ещё разок?'
     else:
         reply_text = f'Неправильно :( Правильный ответ - "{answer}". Хотите попробовать ещё раз?'

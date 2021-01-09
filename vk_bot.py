@@ -61,7 +61,7 @@ def handle_solution_attempt(event, vk_api, redis_db):
     """Check the answer. If it's correct, send congrats, else show the right answer."""
     question = redis_db.get(event.user_id).decode('utf-8')
     answer = get_answer(question)
-    if is_correct_answer(event.message, answer, cheating=True):
+    if is_correct_answer(event.message, answer):
         reply_text = 'Поздравляем! Ответ верен. Ещё разок?'
     else:
         reply_text = f'Неправильно :( Правильный ответ - "{answer}". Хотите попробовать ещё раз?'
