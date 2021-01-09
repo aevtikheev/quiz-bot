@@ -7,11 +7,12 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.utils import get_random_id
 
 from env_settings import env_settings
-from questions import (get_random_question, get_answer, is_correct_answer,
-                       NEW_QUESTION_TEXT, GIVE_UP_TEXT, SCORE_TEXT)
+from questions import get_random_question, get_answer, is_correct_answer
+from bot_text import NEW_QUESTION_TEXT, GIVE_UP_TEXT, SCORE_TEXT
 
 
 def handle_new_player(event: Event, vk_api: VkApiMethod):
+    """Introduce a new player to the game."""
     keyboard = VkKeyboard()
     keyboard.add_button(NEW_QUESTION_TEXT, color=VkKeyboardColor.PRIMARY)
     keyboard.add_button(GIVE_UP_TEXT, color=VkKeyboardColor.NEGATIVE)
@@ -27,6 +28,7 @@ def handle_new_player(event: Event, vk_api: VkApiMethod):
 
 
 def handle_new_question_request(event, vk_api, redis_db):
+    """Send new question to the player."""
     question = get_random_question()
     redis_db.set(event.user_id, question)
     vk_api.messages.send(
@@ -37,6 +39,7 @@ def handle_new_question_request(event, vk_api, redis_db):
 
 
 def handle_give_up_request(event, vk_api, redis_db):
+    """Show the correct answer and ask a new one."""
     question = redis_db.get(event.user_id).decode('utf-8')
     answer = get_answer(question)
     vk_api.messages.send(
@@ -55,6 +58,7 @@ def handle_give_up_request(event, vk_api, redis_db):
 
 
 def handle_solution_attempt(event, vk_api, redis_db):
+    """Check the answer. If it's correct, send congrats, else show the right answer."""
     question = redis_db.get(event.user_id).decode('utf-8')
     answer = get_answer(question)
     if is_correct_answer(event.message, answer, cheating=True):
@@ -69,6 +73,7 @@ def handle_solution_attempt(event, vk_api, redis_db):
 
 
 def handle_score_request(event, vk_api):
+    """Show the overall score for the player."""
     vk_api.messages.send(
         user_id=event.user_id,
         message='Десять Вассерманов из десяти. Вы великолепны!',
@@ -77,6 +82,7 @@ def handle_score_request(event, vk_api):
 
 
 def handle_event(event, vk_api, redis_db):
+    """Handle new message from a player."""
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
         if event.text == NEW_QUESTION_TEXT:
             handle_new_question_request(event, vk_api, redis_db)
