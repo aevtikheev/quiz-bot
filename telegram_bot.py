@@ -1,9 +1,9 @@
-"""Telegram version of a support bot."""
+"""Telegram version of Quiz Bot."""
 from enum import Enum
 
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
-                          CallbackContext, ConversationHandler, RegexHandler)
+                          CallbackContext, ConversationHandler)
 from redis import Redis
 
 from env_settings import env_settings
@@ -56,7 +56,7 @@ def handle_solution_attempt(
     redis_db = context.bot_data[BOT_DATA_REDIS_DB]
     question = redis_db.get(update.effective_user.id).decode('utf-8')
     answer = get_answer(question)
-    if is_correct_answer(update.message.text, answer):
+    if is_correct_answer(update.message.text, answer, cheating=True):
         reply_text = 'Поздравляем! Ответ верен. Ещё разок?'
     else:
         reply_text = f'Неправильно :( Правильный ответ - "{answer}". Хотите попробовать ещё раз?'
@@ -73,9 +73,23 @@ def handle_give_up_request(
     redis_db = context.bot_data[BOT_DATA_REDIS_DB]
     question = redis_db.get(update.effective_user.id).decode('utf-8')
     answer = get_answer(question)
-    update.message.reply_text(f'Правильный ответ: "{answer}". Хотите попробовать ещё раз?')
+    update.message.reply_text(f'Правильный ответ: "{answer}"')
 
-    return BotState.MENU
+    new_question = get_random_question()
+    redis_db.set(update.effective_user.id, new_question)
+    update.message.reply_text(new_question)
+
+    return BotState.QUESTION
+
+
+def handle_score_request(
+        update: Update,
+        context: CallbackContext
+):
+    """TODO"""
+    update.message.reply_text(f'Десять Вассерманов из десяти. Вы великолепны!')
+
+    return ConversationHandler.END
 
 
 def start_bot() -> None:
@@ -100,7 +114,12 @@ def start_bot() -> None:
                     Filters.regex(NEW_QUESTION_TEXT),
                     handle_new_question_request,
                     pass_user_data=True
-                )
+                ),
+                MessageHandler(
+                    Filters.regex(SCORE_TEXT),
+                    handle_score_request,
+                    pass_user_data=True
+                ),
             ],
 
             BotState.QUESTION: [
@@ -113,7 +132,7 @@ def start_bot() -> None:
                     Filters.text & ~Filters.command,
                     handle_solution_attempt,
                     pass_user_data=True
-                )
+                ),
             ],
         },
 

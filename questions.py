@@ -5,6 +5,9 @@ import random
 from env_settings import env_settings
 
 
+CHEAT_PHRASE = 'cheat'
+
+
 def get_random_question():
     """TODO"""
     with open(env_settings.questions_file) as questions_file:
@@ -19,8 +22,11 @@ def get_answer(question):
         return questions[question]
 
 
-def is_correct_answer(user_answer, true_answer):
+def is_correct_answer(user_answer, true_answer, cheating=False):
     """TODO"""
+    if cheating and user_answer == CHEAT_PHRASE:
+        return True
+
     exact_answer = true_answer
     if '(' in true_answer:
         exact_answer = true_answer.split('(')[0]

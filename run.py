@@ -1,4 +1,4 @@
-"""Entry point to operate with a Quiz Bot."""
+"""Entry point to operate with Quiz Bot."""
 import argparse
 import sys
 

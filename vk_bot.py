@@ -1,4 +1,4 @@
-"""VK version of a support bot."""
+"""VK version of Quiz Bot."""
 import random
 
 import vk_api
