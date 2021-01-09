@@ -1,4 +1,4 @@
-"""Common functions to work with questions"""
+"""Common functions to work with questions."""
 import json
 import random
 
