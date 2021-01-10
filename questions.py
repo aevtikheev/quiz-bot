@@ -36,4 +36,4 @@ def is_correct_answer(user_answer: str, true_answer: str, cheating=False) -> boo
     if '.' in true_answer:
         exact_answer = true_answer.split('.')[0]
     exact_answer = exact_answer.rstrip()
-    return user_answer == exact_answer
+    return user_answer.lower() == exact_answer.lower()
