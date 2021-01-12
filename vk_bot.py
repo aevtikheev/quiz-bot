@@ -7,7 +7,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from vk_api.utils import get_random_id
 
 from env_settings import env_settings
-from questions import get_random_question, get_answer, is_correct_answer
+from questions import QuizDB, is_correct_answer
 from bot_text import NEW_QUESTION_TEXT, GIVE_UP_TEXT, SCORE_TEXT
 
 
@@ -27,9 +27,9 @@ def handle_new_player(event: Event, vk_api: VkApiMethod):
     )
 
 
-def handle_new_question_request(event, vk_api, redis_db):
+def handle_new_question_request(event, vk_api, redis_db, quiz_db):
     """Send new question to the player."""
-    question = get_random_question()
+    question = quiz_db.get_random_question()
     redis_db.set(event.user_id, question)
     vk_api.messages.send(
         user_id=event.user_id,
@@ -38,17 +38,17 @@ def handle_new_question_request(event, vk_api, redis_db):
     )
 
 
-def handle_give_up_request(event, vk_api, redis_db):
+def handle_give_up_request(event, vk_api, redis_db, quiz_db):
     """Show the correct answer and ask a new one."""
     question = redis_db.get(event.user_id).decode('utf-8')
-    answer = get_answer(question)
+    answer = quiz_db.get_answer(question)
     vk_api.messages.send(
         user_id=event.user_id,
         message=f'Правильный ответ: "{answer}"',
         random_id=get_random_id()
     )
 
-    new_question = get_random_question()
+    new_question = quiz_db.get_random_question()
     redis_db.set(event.user_id, new_question)
     vk_api.messages.send(
         user_id=event.user_id,
@@ -57,10 +57,10 @@ def handle_give_up_request(event, vk_api, redis_db):
     )
 
 
-def handle_solution_attempt(event, vk_api, redis_db):
+def handle_solution_attempt(event, vk_api, redis_db, quiz_db):
     """Check the answer. If it's correct, send congrats, else show the right answer."""
     question = redis_db.get(event.user_id).decode('utf-8')
-    answer = get_answer(question)
+    answer = quiz_db.get_answer(question)
     if is_correct_answer(event.message, answer):
         reply_text = 'Поздравляем! Ответ верен. Ещё разок?'
     else:
@@ -81,19 +81,19 @@ def handle_score_request(event, vk_api):
     )
 
 
-def handle_event(event, vk_api, redis_db):
+def handle_event(event, vk_api, redis_db, quiz_db):
     """Handle new message from a player."""
     if event.type == VkEventType.MESSAGE_NEW and event.to_me:
         if event.text == NEW_QUESTION_TEXT:
-            handle_new_question_request(event, vk_api, redis_db)
+            handle_new_question_request(event, vk_api, redis_db, quiz_db)
         elif event.text == GIVE_UP_TEXT:
-            handle_give_up_request(event, vk_api, redis_db)
+            handle_give_up_request(event, vk_api, redis_db, quiz_db)
         elif event.text == SCORE_TEXT:
             handle_score_request(event, vk_api)
         elif redis_db.get(event.user_id) is None:
             handle_new_player(event, vk_api)
         else:
-            handle_solution_attempt(event, vk_api, redis_db)
+            handle_solution_attempt(event, vk_api, redis_db, quiz_db)
 
 
 def start_bot() -> None:
@@ -107,6 +107,7 @@ def start_bot() -> None:
             port=env_settings.redis_port,
             password=env_settings.redis_password
         )
+    quiz_db = QuizDB(env_settings.questions_file)
 
     for event in longpoll.listen():
-        handle_event(event, vk_api, redis_db)
+        handle_event(event, vk_api, redis_db, quiz_db)
