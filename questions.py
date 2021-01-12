@@ -2,38 +2,31 @@
 import json
 import random
 
-from env_settings import env_settings
-
 
 CHEAT_PHRASE = 'cheat'
 
 
-def get_random_question() -> str:
-    """Extract a random question from question data file."""
-    with open(env_settings.questions_file) as questions_file:
-        questions = json.load(questions_file)
-        return random.choice(list(questions.keys()))
+class QuizDB:
+    """Class to work with questions JSON file."""
+    def __init__(self, questions_file):
+        with open(questions_file) as questions:
+            self._questions = json.load(questions)
 
+    def get_random_question(self) -> str:
+        """Extract a random question from question data file."""
+        return random.choice(list(self._questions.keys()))
 
-def get_answer(question) -> str:
-    """Get answer for a question from question data file."""
-    with open(env_settings.questions_file) as questions_file:
-        questions = json.load(questions_file)
-        return questions[question]
+    def get_answer(self, question) -> str:
+        """Get answer for a question from question data file."""
+        return self._questions[question]
 
 
 def is_correct_answer(user_answer: str, true_answer: str, cheating=False) -> bool:
     """
-    Clean the answer from the question data file and compare with the given one.
+    Compare user's answer and a true answer.
     If cheating set to True, CHEAT_PHRASE considered as a correct answer.
     """
     if cheating and user_answer == CHEAT_PHRASE:
         return True
 
-    exact_answer = true_answer
-    if '(' in true_answer:
-        exact_answer = true_answer.split('(')[0]
-    if '.' in true_answer:
-        exact_answer = true_answer.split('.')[0]
-    exact_answer = exact_answer.rstrip()
-    return user_answer.lower() == exact_answer.lower()
+    return user_answer.lower() == true_answer.lower()
