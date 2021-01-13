@@ -11,7 +11,7 @@ from questions import QuizDB, is_correct_answer
 from bot_text import NEW_QUESTION_TEXT, GIVE_UP_TEXT, SCORE_TEXT
 
 
-BOT_DATA_REDIS_DB_KEY = 'redis_db'
+BOT_DATA_USERS_DB_KEY = 'redis_db'
 BOT_DATA_QUIZ_DB_KEY = 'quiz_db'
 
 
@@ -34,11 +34,11 @@ def handle_start(update: Update, context: CallbackContext) -> BotState:
 
 def handle_new_question_request(update: Update, context: CallbackContext) -> BotState:
     """Send new question to the player."""
-    redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
+    users_db = context.bot_data[BOT_DATA_USERS_DB_KEY]
     quiz_db = context.bot_data[BOT_DATA_QUIZ_DB_KEY]
 
     question = quiz_db.get_random_question()
-    redis_db.set(update.effective_user.id, question)
+    users_db.set(update.effective_user.id, question)
     update.message.reply_text(question)
 
     return BotState.QUESTION
@@ -46,10 +46,10 @@ def handle_new_question_request(update: Update, context: CallbackContext) -> Bot
 
 def handle_solution_attempt(update: Update, context: CallbackContext) -> BotState:
     """Check the answer. If it's correct, send congrats, else show the right answer."""
-    redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
+    users_db = context.bot_data[BOT_DATA_USERS_DB_KEY]
     quiz_db = context.bot_data[BOT_DATA_QUIZ_DB_KEY]
 
-    question = redis_db.get(update.effective_user.id).decode('utf-8')
+    question = users_db.get(update.effective_user.id).decode('utf-8')
     answer = quiz_db.get_answer(question)
     if is_correct_answer(update.message.text, answer):
         reply_text = 'Поздравляем! Ответ верен. Ещё разок?'
@@ -62,15 +62,15 @@ def handle_solution_attempt(update: Update, context: CallbackContext) -> BotStat
 
 def handle_give_up_request(update: Update, context: CallbackContext) -> BotState:
     """Show the correct answer and ask a new one."""
-    redis_db = context.bot_data[BOT_DATA_REDIS_DB_KEY]
+    users_db = context.bot_data[BOT_DATA_USERS_DB_KEY]
     quiz_db = context.bot_data[BOT_DATA_QUIZ_DB_KEY]
 
-    question = redis_db.get(update.effective_user.id).decode('utf-8')
+    question = users_db.get(update.effective_user.id).decode('utf-8')
     answer = quiz_db.get_answer(question)
     update.message.reply_text(f'Правильный ответ: "{answer}"')
 
     new_question = quiz_db.get_random_question()
-    redis_db.set(update.effective_user.id, new_question)
+    users_db.set(update.effective_user.id, new_question)
     update.message.reply_text(new_question)
 
     return BotState.QUESTION
@@ -85,7 +85,7 @@ def handle_score_request(update: Update, context: CallbackContext) -> int:
 
 def start_bot() -> None:
     """Start Telegram bot."""
-    redis_db = Redis(
+    users_db = Redis(
             host=env_settings.redis_host,
             port=env_settings.redis_port,
             password=env_settings.redis_password
@@ -95,7 +95,7 @@ def start_bot() -> None:
     bot_token = env_settings.tg_bot_token
     updater = Updater(bot_token)
     dispatcher = updater.dispatcher
-    dispatcher.bot_data[BOT_DATA_REDIS_DB_KEY] = redis_db
+    dispatcher.bot_data[BOT_DATA_USERS_DB_KEY] = users_db
     dispatcher.bot_data[BOT_DATA_QUIZ_DB_KEY] = quiz_db
 
     conv_handler = ConversationHandler(
