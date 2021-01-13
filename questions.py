@@ -7,7 +7,6 @@ from typing import Tuple
 
 
 CHEAT_PHRASE = 'cheat'
-PARSE_QUESTIONS_FILE_TIMEOUT = 5
 
 
 logging.basicConfig(
