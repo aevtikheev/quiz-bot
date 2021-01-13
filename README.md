@@ -3,11 +3,11 @@ Simple bot that plays quiz game with you.
 ## Set up:
 Set environment variables:
 * TELEGRAM_BOT_TOKEN - Telegram bot token. Can be obtained from [Bot Father](https://telegram.me/BotFather).
-* VK_BOT_TOKEN - Vkontakte.ru bot token. Generated at the VK group administration panel.* GOOGLE_APPLICATION_CREDENTIALS - Path to a [GOOGLE_APPLICATION_CREDENTIALS file](https://cloud.google.com/docs/authentication/getting-started).
+* VK_BOT_TOKEN - Vkontakte.ru bot token. Generated at the VK group administration panel.
 * REDIS_HOST - Redis DB hostname.
 * REDIS_PORT - Redis DB port.
 * REDIS_PASSWORD - Redis DB password.
-* QUESTIONS_FILE - Path to a file where questions for the bot are stored (as a JSON)
+* QUESTIONS_FILE - Path to a file where questions for the bot are stored (as a JSON). There is a [file](https://github.com/aevtikheev/quiz_bot/blob/master/questions.json) with some questions.
 
 ## Usage:
 * Run Telegram bot.
