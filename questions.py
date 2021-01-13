@@ -50,11 +50,13 @@ def _parse_block(block: str) -> Tuple[str, str]:
     question = " ".join(question.split())
 
     answer_start = block.find('\n', block.find('Ответ')) + 1
-    end_symbols_positions = [position for position in (
-        block.find('.', answer_start),
-        block.find('(', answer_start),
-        block.find('\n', answer_start)
-    ) if position != -1]  # position is -1 if the symbol is not in the block.
+    end_symbols_positions = [
+        position for position in (
+            block.find('.', answer_start),
+            block.find('(', answer_start),
+            block.find('\n', answer_start)
+        ) if position != -1  # position is -1 if the symbol is not in the block.
+    ]
     answer_end = min(end_symbols_positions) if end_symbols_positions else -1
     answer = block[answer_start:answer_end].strip()
 
@@ -74,7 +76,6 @@ def parse_questions(raw_data_folder: str, parsed_questions_file: str) -> None:
             for block in questions_file_blocks:
                 if 'Вопрос' in block and 'Ответ' in block:
                     question, answer = _parse_block(block)
-
                 questions[question] = answer
             logger.info(f'File {questions_file_name} parsed')
 
