@@ -51,13 +51,11 @@ def _parse_block(block: str) -> Tuple[str, str]:
     question = " ".join(question.split())
 
     answer_start = block.find('\n', block.find('Ответ')) + 1
-
     end_symbols_positions = [position for position in (
         block.find('.', answer_start),
         block.find('(', answer_start),
         block.find('\n', answer_start)
     ) if position != -1]  # position is -1 if the symbol is not in the block.
-
     answer_end = min(end_symbols_positions) if end_symbols_positions else -1
     answer = block[answer_start:answer_end].strip()
 
