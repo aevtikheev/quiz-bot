@@ -9,10 +9,6 @@ from typing import Tuple
 CHEAT_PHRASE = 'cheat'
 
 
-logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    level=logging.INFO
-)
 logger = logging.getLogger()
 
 
@@ -66,11 +62,11 @@ def _parse_block(block: str) -> Tuple[str, str]:
 def parse_questions(raw_data_folder: str, parsed_questions_file: str) -> None:
     """Parse raw questions data and write parsed data to a file."""
     raw_data_folder_content = pathlib.Path(raw_data_folder).glob('**/*')
-    question_files_list = [item for item in raw_data_folder_content if item.is_file()]
+    question_files = [item for item in raw_data_folder_content if item.is_file()]
 
     questions = dict()
 
-    for questions_file_name in question_files_list:
+    for questions_file_name in question_files:
         with open(questions_file_name, 'r', encoding='KOI8-R') as questions_file:
             questions_file_blocks = questions_file.read().split('\n\n\n')
             for block in questions_file_blocks:

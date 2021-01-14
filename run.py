@@ -1,5 +1,6 @@
 """Entry point to operate with Quiz Bot."""
 import argparse
+import logging
 import sys
 
 import telegram_bot
@@ -37,6 +38,10 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    logging.basicConfig(
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        level=logging.INFO
+    )
     args = parse_args()
     if args.command == CMD_TELEGRAM_BOT:
         telegram_bot.start_bot()
